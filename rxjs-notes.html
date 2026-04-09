@@ -1,0 +1,2023 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RxJS & Observables in Angular — Study Notes</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #141720;
+      --surface: #141720;
+      --surface2: #1b1f2c;
+      --border: #252a38;
+      --accent: #7c6aff;
+      --accent2: #3ecfcf;
+      --accent3: #ff7a59;
+      --text: #dde2f0;
+      --muted: #7a82a0;
+      --code-bg: #0a0c10;
+      --kw: #b48eff;
+      --fn: #7dd3fc;
+      --str: #86efac;
+      --num: #fca5a5;
+      --cm: #4b5563;
+      --op: #94a3b8;
+      --cls: #fde68a;
+      --tag: #f9a8d4;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    /* ─── SIDEBAR ─── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 240px;
+      height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 24px 0;
+      z-index: 100;
+    }
+
+    nav .logo {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    nav .logo span {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .12em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    nav .logo h1 {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    nav a {
+      display: block;
+      padding: 6px 20px;
+      font-size: 12.5px;
+      color: var(--muted);
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: all .15s;
+    }
+
+    nav a:hover {
+      color: var(--text);
+      border-left-color: var(--accent);
+      background: var(--surface2);
+    }
+
+    nav .nav-section {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      padding: 14px 20px 4px;
+    }
+
+    /* ─── MAIN ─── */
+    main {
+      margin-left: 240px;
+      padding: 48px 56px 80px;
+      max-width: 900px;
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      background: linear-gradient(135deg, #1a1040 0%, #0d1a2e 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px 48px;
+      margin-bottom: 56px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -80px;
+      right: -60px;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(124, 106, 255, .18) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -60px;
+      left: 40px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(62, 207, 207, .12) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      background: rgba(124, 106, 255, .15);
+      border: 1px solid rgba(124, 106, 255, .3);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      font-size: 36px;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+
+    .hero h1 em {
+      color: var(--accent);
+      font-style: normal;
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 15px;
+      max-width: 480px;
+    }
+
+    /* ─── SECTIONS ─── */
+    section {
+      margin-bottom: 64px;
+    }
+
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 8px;
+    }
+
+    .section-label::before {
+      content: '';
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--accent2);
+      border-radius: 2px;
+    }
+
+    section>h2 {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h3 {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 28px 0 10px;
+    }
+
+    p {
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* ─── CALLOUT ─── */
+    .callout {
+      display: flex;
+      gap: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin: 18px 0;
+    }
+
+    .callout.tip {
+      border-left: 3px solid var(--accent2);
+    }
+
+    .callout.warn {
+      border-left: 3px solid var(--accent3);
+    }
+
+    .callout.info {
+      border-left: 3px solid var(--accent);
+    }
+
+    .callout-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .callout p {
+      margin: 0;
+      font-size: 13.5px;
+    }
+
+    .callout strong {
+      color: var(--text);
+    }
+
+    /* ─── TABLE ─── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0;
+      font-size: 13.5px;
+    }
+
+    th {
+      background: var(--surface2);
+      color: var(--accent2);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      vertical-align: top;
+    }
+
+    td:first-child {
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: var(--surface);
+    }
+
+    /* ─── CODE BLOCK ─── */
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin: 16px 0;
+      overflow: hidden;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .code-header .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .code-header .dot.r {
+      background: #ff5f57;
+    }
+
+    .code-header .dot.y {
+      background: #febc2e;
+    }
+
+    .code-header .dot.g {
+      background: #28c840;
+    }
+
+    .code-header span {
+      margin-left: 6px;
+    }
+
+    pre {
+      padding: 20px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.75;
+      tab-size: 2;
+    }
+
+    /* Syntax */
+    .kw {
+      color: var(--kw);
+    }
+
+    .fn {
+      color: var(--fn);
+    }
+
+    .str {
+      color: var(--str);
+    }
+
+    .num {
+      color: var(--num);
+    }
+
+    .cm {
+      color: var(--cm);
+    }
+
+    .op {
+      color: var(--op);
+    }
+
+    .cls {
+      color: var(--cls);
+    }
+
+    .tag {
+      color: var(--tag);
+    }
+
+    .acc {
+      color: var(--accent2);
+    }
+
+    .acc3 {
+      color: var(--accent3);
+    }
+
+    /* ─── BADGE ─── */
+    .badge {
+      display: inline-block;
+      background: rgba(124, 106, 255, .12);
+      border: 1px solid rgba(124, 106, 255, .25);
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .badge.green {
+      background: rgba(62, 207, 207, .1);
+      border-color: rgba(62, 207, 207, .25);
+      color: var(--accent2);
+    }
+
+    .badge.orange {
+      background: rgba(255, 122, 89, .1);
+      border-color: rgba(255, 122, 89, .25);
+      color: var(--accent3);
+    }
+
+    /* ─── DIVIDER ─── */
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 40px 0;
+    }
+
+    /* ─── INLINE CODE ─── */
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: var(--accent2);
+    }
+
+    /* ─── SUMMARY BOX ─── */
+    .summary {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--accent);
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin: 20px 0;
+    }
+
+    .summary h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .summary ul {
+      padding-left: 18px;
+    }
+
+    .summary li {
+      color: var(--muted);
+      font-size: 13.5px;
+      margin-bottom: 5px;
+    }
+
+    .summary li strong {
+      color: var(--text);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--muted);
+    }
+
+    @media (max-width: 900px) {
+      nav {
+        display: none;
+      }
+
+      main {
+        margin-left: 0;
+        padding: 24px 20px 60px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+    <div class="logo">
+      <span>Angular</span>
+      <h1>RxJS Notes</h1>
+    </div>
+    <div class="nav-section">Foundations</div>
+    <a href="#s1">What is an Observable?</a>
+    <a href="#s2">Observer & Subscription</a>
+    <a href="#s3">Cold vs Hot</a>
+    <div class="nav-section">Creation</div>
+    <a href="#s4">of / from / fromEvent</a>
+    <a href="#s5">interval / timer / EMPTY</a>
+    <a href="#s6">Subjects</a>
+    <div class="nav-section">Operators</div>
+    <a href="#s7">map / filter / tap</a>
+    <a href="#s8">Higher-order maps</a>
+    <a href="#s9">Time operators</a>
+    <a href="#s10">Limiting operators</a>
+    <a href="#s11">Combination operators</a>
+    <a href="#s12">Error handling</a>
+    <a href="#s13">shareReplay</a>
+    <div class="nav-section">Angular</div>
+    <a href="#s14">async pipe</a>
+    <a href="#s15">Reactive forms</a>
+    <a href="#s16">Router streams</a>
+    <a href="#s17">HttpClient</a>
+    <div class="nav-section">Advanced</div>
+    <a href="#s18">Reactive state service</a>
+    <a href="#s19">scan / reduce</a>
+    <a href="#s20">Memory leaks</a>
+  </nav>
+
+  <main>
+
+    <div class="hero">
+      <div class="hero-tag">Complete Study Notes</div>
+      <h1>RxJS &amp; <em>Observables</em><br>in Angular</h1>
+      <p>Every concept you need — from the Observable contract to advanced patterns — with practical Angular examples
+        throughout.</p>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════ SECTION 1 -->
+    <section id="s1">
+      <div class="section-label">Foundations</div>
+      <h2>1. What is an Observable?</h2>
+      <p>An Observable is a <strong>lazy data stream</strong> that can emit zero or more values over time, either
+        synchronously or asynchronously. Think of it as a function that can return multiple values instead of just one.
+      </p>
+
+      <div class="callout info">
+        <span class="callout-icon">💡</span>
+        <p><strong>Key mental model:</strong> A Promise gives you one value, once, and starts immediately. An Observable
+          gives you many values, over time, and starts only when you subscribe.</p>
+      </div>
+
+      <h3>Creating an Observable from scratch</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>basic-observable.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="cls">Observable</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+
+<span class="cm">// The function inside new Observable() is called the "subscriber function"</span>
+<span class="cm">// It runs fresh for EVERY new subscription (lazy)</span>
+<span class="kw">const</span> <span class="fn">numbers$</span> = <span class="kw">new</span> <span class="cls">Observable</span>&lt;<span class="cls">number</span>&gt;(<span class="fn">subscriber</span> <span class="op">=></span> {
+  <span class="fn">subscriber</span>.<span class="fn">next</span>(<span class="num">10</span>);
+  <span class="fn">subscriber</span>.<span class="fn">next</span>(<span class="num">20</span>);
+  <span class="fn">subscriber</span>.<span class="fn">next</span>(<span class="num">30</span>);
+  <span class="fn">subscriber</span>.<span class="fn">complete</span>(); <span class="cm">// stream ends</span>
+});
+
+<span class="cm">// Nothing runs until you subscribe</span>
+<span class="fn">numbers$</span>.<span class="fn">subscribe</span>(<span class="fn">value</span> <span class="op">=></span> <span class="fn">console</span>.<span class="fn">log</span>(<span class="fn">value</span>));
+<span class="cm">// Output: 10, 20, 30</span></pre>
+      </div>
+
+      <h3>Observable vs Promise — side by side</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>vs-promise.ts</span>
+        </div>
+        <pre><span class="cm">// ── PROMISE ──────────────────────────────────────────────</span>
+<span class="kw">const</span> <span class="fn">promise</span> = <span class="kw">new</span> <span class="cls">Promise</span>(<span class="fn">resolve</span> <span class="op">=></span> {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Promise executes NOW'</span>);  <span class="cm">// runs immediately</span>
+  <span class="fn">resolve</span>(<span class="num">42</span>);
+});
+<span class="cm">// "Promise executes NOW" already printed</span>
+
+<span class="fn">promise</span>.<span class="fn">then</span>(<span class="fn">v</span> <span class="op">=></span> <span class="fn">console</span>.<span class="fn">log</span>(<span class="fn">v</span>)); <span class="cm">// 42</span>
+
+<span class="cm">// ── OBSERVABLE ───────────────────────────────────────────</span>
+<span class="kw">const</span> <span class="fn">observable$</span> = <span class="kw">new</span> <span class="cls">Observable</span>(<span class="fn">subscriber</span> <span class="op">=></span> {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Observable executes LAZILY'</span>); <span class="cm">// not yet</span>
+  <span class="fn">subscriber</span>.<span class="fn">next</span>(<span class="num">42</span>);
+});
+<span class="cm">// Nothing printed yet</span>
+
+<span class="fn">observable$</span>.<span class="fn">subscribe</span>(<span class="fn">v</span> <span class="op">=></span> <span class="fn">console</span>.<span class="fn">log</span>(<span class="fn">v</span>));
+<span class="cm">// NOW "Observable executes LAZILY" prints, then 42</span></pre>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Observable</th>
+            <th>Promise</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Values emitted</td>
+            <td>0 to many</td>
+            <td>Exactly 1</td>
+          </tr>
+          <tr>
+            <td>Execution</td>
+            <td>Lazy (on subscribe)</td>
+            <td>Eager (immediately)</td>
+          </tr>
+          <tr>
+            <td>Cancellable</td>
+            <td>Yes (unsubscribe)</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td>Synchronous</td>
+            <td>Yes</td>
+            <td>No (always async)</td>
+          </tr>
+          <tr>
+            <td>Operators</td>
+            <td>Rich (map, filter…)</td>
+            <td>Limited (.then, .catch)</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════ SECTION 2 -->
+    <section id="s2">
+      <div class="section-label">Foundations</div>
+      <h2>2. Observer &amp; Subscription</h2>
+      <p>An <strong>Observer</strong> is the consumer — an object with three optional callbacks. A
+        <strong>Subscription</strong> is the handle returned when you subscribe, which lets you cancel.
+      </p>
+
+      <h3>Full observer object</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>observer.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="cls">Observable</span>, <span class="cls">Observer</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+
+<span class="kw">const</span> <span class="fn">observer</span>: <span class="cls">Observer</span>&lt;<span class="cls">string</span>&gt; = {
+  <span class="fn">next</span>:     (<span class="fn">value</span>) <span class="op">=></span> <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Value:'</span>, <span class="fn">value</span>),
+  <span class="fn">error</span>:    (<span class="fn">err</span>)   <span class="op">=></span> <span class="fn">console</span>.<span class="fn">error</span>(<span class="str">'Error:'</span>, <span class="fn">err</span>),
+  <span class="fn">complete</span>: ()      <span class="op">=></span> <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Stream done!'</span>),
+};
+
+<span class="kw">const</span> <span class="fn">data$</span> = <span class="kw">new</span> <span class="cls">Observable</span>&lt;<span class="cls">string</span>&gt;(<span class="fn">sub</span> <span class="op">=></span> {
+  <span class="fn">sub</span>.<span class="fn">next</span>(<span class="str">'Hello'</span>);
+  <span class="fn">sub</span>.<span class="fn">next</span>(<span class="str">'World'</span>);
+  <span class="fn">sub</span>.<span class="fn">complete</span>();
+});
+
+<span class="fn">data$</span>.<span class="fn">subscribe</span>(<span class="fn">observer</span>);
+<span class="cm">// Value: Hello  |  Value: World  |  Stream done!</span></pre>
+      </div>
+
+      <h3>Using the Subscription to unsubscribe</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>subscription.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="cls">interval</span>, <span class="cls">Subscription</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+
+<span class="cm">// interval emits 0, 1, 2, 3... every 1 second — never completes</span>
+<span class="kw">const</span> <span class="fn">sub</span>: <span class="cls">Subscription</span> = <span class="fn">interval</span>(<span class="num">1000</span>).<span class="fn">subscribe</span>(<span class="fn">n</span> <span class="op">=></span>
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'tick:'</span>, <span class="fn">n</span>)
+);
+
+<span class="cm">// Stop after 5 seconds</span>
+<span class="fn">setTimeout</span>(() <span class="op">=></span> {
+  <span class="fn">sub</span>.<span class="fn">unsubscribe</span>();
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Unsubscribed — no more ticks'</span>);
+}, <span class="num">5000</span>);</pre>
+      </div>
+
+      <h3>Teardown logic — cleanup when unsubscribed</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>teardown.ts</span>
+        </div>
+        <pre><span class="kw">const</span> <span class="fn">websocket$</span> = <span class="kw">new</span> <span class="cls">Observable</span>(<span class="fn">subscriber</span> <span class="op">=></span> {
+  <span class="kw">const</span> <span class="fn">ws</span> = <span class="kw">new</span> <span class="cls">WebSocket</span>(<span class="str">'ws://localhost:8080'</span>);
+  <span class="fn">ws</span>.<span class="fn">onmessage</span> = (<span class="fn">e</span>) <span class="op">=></span> <span class="fn">subscriber</span>.<span class="fn">next</span>(<span class="fn">e</span>.<span class="fn">data</span>);
+  <span class="fn">ws</span>.<span class="fn">onerror</span>  = (<span class="fn">e</span>) <span class="op">=></span> <span class="fn">subscriber</span>.<span class="fn">error</span>(<span class="fn">e</span>);
+
+  <span class="cm">// Return function runs on unsubscribe / complete / error</span>
+  <span class="kw">return</span> () <span class="op">=></span> {
+    <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Closing WebSocket'</span>);
+    <span class="fn">ws</span>.<span class="fn">close</span>();
+  };
+});
+
+<span class="kw">const</span> <span class="fn">sub</span> = <span class="fn">websocket$</span>.<span class="fn">subscribe</span>(<span class="fn">msg</span> <span class="op">=></span> <span class="fn">console</span>.<span class="fn">log</span>(<span class="fn">msg</span>));
+<span class="fn">sub</span>.<span class="fn">unsubscribe</span>(); <span class="cm">// → "Closing WebSocket"</span></pre>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════ SECTION 3 -->
+    <section id="s3">
+      <div class="section-label">Foundations</div>
+      <h2>3. Cold vs Hot Observables</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>When does it start?</th>
+            <th>Is data shared?</th>
+            <th>Examples</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Cold</td>
+            <td>Each subscriber gets its own execution</td>
+            <td>No — each sub gets fresh values</td>
+            <td>HTTP calls, of(), from()</td>
+          </tr>
+          <tr>
+            <td>Hot</td>
+            <td>Already running, subscribers tap in</td>
+            <td>Yes — all subs share the same stream</td>
+            <td>Subject, fromEvent(), WebSocket</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Cold: each subscriber gets its own copy</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>cold.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="cls">Observable</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+
+<span class="kw">const</span> <span class="fn">cold$</span> = <span class="kw">new</span> <span class="cls">Observable</span>(<span class="fn">sub</span> <span class="op">=></span> {
+  <span class="fn">sub</span>.<span class="fn">next</span>(<span class="cls">Math</span>.<span class="fn">random</span>()); <span class="cm">// different number each time</span>
+  <span class="fn">sub</span>.<span class="fn">complete</span>();
+});
+
+<span class="fn">cold$</span>.<span class="fn">subscribe</span>(<span class="fn">v</span> <span class="op">=></span> <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Sub A:'</span>, <span class="fn">v</span>)); <span class="cm">// 0.423</span>
+<span class="fn">cold$</span>.<span class="fn">subscribe</span>(<span class="fn">v</span> <span class="op">=></span> <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Sub B:'</span>, <span class="fn">v</span>)); <span class="cm">// 0.819 (different!)</span>
+
+<span class="cm">// HttpClient works the same — two subscribers = two HTTP requests</span></pre>
+      </div>
+
+      <h3>Hot: all subscribers share the same stream</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>hot.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="cls">Subject</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+
+<span class="kw">const</span> <span class="fn">hot$</span> = <span class="kw">new</span> <span class="cls">Subject</span>&lt;<span class="cls">number</span>&gt;();
+
+<span class="fn">hot$</span>.<span class="fn">subscribe</span>(<span class="fn">v</span> <span class="op">=></span> <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Sub A:'</span>, <span class="fn">v</span>));
+<span class="fn">hot$</span>.<span class="fn">subscribe</span>(<span class="fn">v</span> <span class="op">=></span> <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Sub B:'</span>, <span class="fn">v</span>));
+
+<span class="fn">hot$</span>.<span class="fn">next</span>(<span class="num">99</span>);
+<span class="cm">// Sub A: 99</span>
+<span class="cm">// Sub B: 99  ← both got the same value from the same event</span></pre>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════ SECTION 4 -->
+    <section id="s4">
+      <div class="section-label">Creation Operators</div>
+      <h2>4. of / from / fromEvent</h2>
+
+      <h3>of — emit a fixed list of values</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>of.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">of</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+
+<span class="cm">// Synchronously emits each argument then completes</span>
+<span class="fn">of</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>).<span class="fn">subscribe</span>(<span class="fn">console</span>.<span class="fn">log</span>); <span class="cm">// 1, 2, 3</span>
+
+<span class="fn">of</span>(<span class="str">'Loading...'</span>).<span class="fn">subscribe</span>(<span class="fn">msg</span> <span class="op">=></span> (<span class="kw">this</span>.<span class="fn">status</span> = <span class="fn">msg</span>));
+
+<span class="cm">// Angular: useful for fallback values in streams</span>
+<span class="kw">const</span> <span class="fn">user$</span> = <span class="fn">this</span>.<span class="fn">userService</span>.<span class="fn">getUser</span>().<span class="fn">pipe</span>(
+  <span class="fn">catchError</span>(() <span class="op">=></span> <span class="fn">of</span>(<span class="kw">null</span>)) <span class="cm">// fallback to null on error</span>
+);</pre>
+      </div>
+
+      <h3>from — convert arrays, Promises, or iterables</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>from.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">from</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+
+<span class="cm">// From array: emits each element</span>
+<span class="fn">from</span>([<span class="str">'Alice'</span>, <span class="str">'Bob'</span>, <span class="str">'Carol'</span>])
+  .<span class="fn">subscribe</span>(<span class="fn">name</span> <span class="op">=></span> <span class="fn">console</span>.<span class="fn">log</span>(<span class="fn">name</span>));
+<span class="cm">// Alice, Bob, Carol</span>
+
+<span class="cm">// From Promise: wraps a promise as an observable</span>
+<span class="fn">from</span>(<span class="fn">fetch</span>(<span class="str">'/api/users'</span>).<span class="fn">then</span>(<span class="fn">r</span> <span class="op">=></span> <span class="fn">r</span>.<span class="fn">json</span>()))
+  .<span class="fn">subscribe</span>(<span class="fn">users</span> <span class="op">=></span> <span class="fn">console</span>.<span class="fn">log</span>(<span class="fn">users</span>));
+
+<span class="cm">// From string: emits each character</span>
+<span class="fn">from</span>(<span class="str">'hello'</span>).<span class="fn">subscribe</span>(<span class="fn">console</span>.<span class="fn">log</span>);
+<span class="cm">// h, e, l, l, o</span></pre>
+      </div>
+
+      <h3>fromEvent — DOM events as streams</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>fromEvent.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">fromEvent</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+<span class="kw">import</span> { <span class="fn">debounceTime</span>, <span class="fn">map</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="cm">// Every keypress on the search input as an Observable</span>
+<span class="kw">const</span> <span class="fn">input</span> = <span class="fn">document</span>.<span class="fn">getElementById</span>(<span class="str">'search'</span>)!;
+
+<span class="fn">fromEvent</span>(<span class="fn">input</span>, <span class="str">'keyup'</span>).<span class="fn">pipe</span>(
+  <span class="fn">debounceTime</span>(<span class="num">300</span>),
+  <span class="fn">map</span>((<span class="fn">e</span>) <span class="op">=></span> (<span class="fn">e</span>.<span class="fn">target</span> <span class="kw">as</span> <span class="cls">HTMLInputElement</span>).<span class="fn">value</span>)
+).<span class="fn">subscribe</span>(<span class="fn">query</span> <span class="op">=></span> <span class="fn">this</span>.<span class="fn">search</span>(<span class="fn">query</span>));
+
+<span class="cm">// In Angular, use reactive forms instead for input — fromEvent</span>
+<span class="cm">// is most useful for window/document-level events:</span>
+<span class="fn">fromEvent</span>(<span class="fn">window</span>, <span class="str">'resize'</span>).<span class="fn">pipe</span>(
+  <span class="fn">debounceTime</span>(<span class="num">100</span>),
+  <span class="fn">map</span>(() <span class="op">=></span> <span class="fn">window</span>.<span class="fn">innerWidth</span>)
+).<span class="fn">subscribe</span>(<span class="fn">width</span> <span class="op">=></span> <span class="fn">this</span>.<span class="fn">screenWidth</span> = <span class="fn">width</span>);</pre>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════ SECTION 5 -->
+    <section id="s5">
+      <div class="section-label">Creation Operators</div>
+      <h2>5. interval / timer / EMPTY</h2>
+
+      <h3>interval — ticks every N milliseconds</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>interval.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">interval</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+<span class="kw">import</span> { <span class="fn">take</span>, <span class="fn">map</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="cm">// Polls an API every 10 seconds — common Angular pattern</span>
+<span class="fn">interval</span>(<span class="num">10000</span>).<span class="fn">pipe</span>(
+  <span class="fn">switchMap</span>(() <span class="op">=></span> <span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">get</span>&lt;<span class="cls">Status</span>&gt;(<span class="str">'/api/status'</span>))
+).<span class="fn">subscribe</span>(<span class="fn">status</span> <span class="op">=></span> <span class="fn">this</span>.<span class="fn">status</span> = <span class="fn">status</span>);
+
+<span class="cm">// Countdown timer</span>
+<span class="fn">interval</span>(<span class="num">1000</span>).<span class="fn">pipe</span>(
+  <span class="fn">take</span>(<span class="num">10</span>),
+  <span class="fn">map</span>((<span class="fn">i</span>) <span class="op">=></span> <span class="num">10</span> <span class="op">-</span> <span class="fn">i</span>)
+).<span class="fn">subscribe</span>(<span class="fn">n</span> <span class="op">=></span> <span class="fn">this</span>.<span class="fn">countdown</span> = <span class="fn">n</span>);</pre>
+      </div>
+
+      <h3>timer — delay then optionally repeat</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>timer.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">timer</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+
+<span class="cm">// Fires once after 3 seconds</span>
+<span class="fn">timer</span>(<span class="num">3000</span>).<span class="fn">subscribe</span>(() <span class="op">=></span> <span class="fn">this</span>.<span class="fn">showBanner</span> = <span class="kw">false</span>);
+
+<span class="cm">// First emission after 2s, then every 5s (like interval but delayed)</span>
+<span class="fn">timer</span>(<span class="num">2000</span>, <span class="num">5000</span>).<span class="fn">pipe</span>(
+  <span class="fn">switchMap</span>(() <span class="op">=></span> <span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">get</span>(<span class="str">'/api/notifications'</span>))
+).<span class="fn">subscribe</span>(...);</pre>
+      </div>
+
+      <h3>EMPTY — completes immediately, emits nothing</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>empty.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="cls">EMPTY</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+
+<span class="cm">// Guard a stream — do nothing if condition not met</span>
+<span class="fn">this</span>.<span class="fn">form</span>.<span class="fn">valueChanges</span>.<span class="fn">pipe</span>(
+  <span class="fn">switchMap</span>((<span class="fn">val</span>) <span class="op">=></span> {
+    <span class="kw">if</span> (!<span class="fn">val</span>.<span class="fn">query</span>.<span class="fn">trim</span>()) <span class="kw">return</span> <span class="cls">EMPTY</span>; <span class="cm">// skip empty queries</span>
+    <span class="kw">return</span> <span class="fn">this</span>.<span class="fn">searchService</span>.<span class="fn">search</span>(<span class="fn">val</span>.<span class="fn">query</span>);
+  })
+).<span class="fn">subscribe</span>(<span class="fn">results</span> <span class="op">=></span> <span class="fn">this</span>.<span class="fn">results</span> = <span class="fn">results</span>);</pre>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════ SECTION 6 -->
+    <section id="s6">
+      <div class="section-label">Creation Operators</div>
+      <h2>6. Subjects</h2>
+      <p>A Subject is both an Observable <em>and</em> an Observer. You can push values into it manually, and multiple
+        subscribers share the same stream (hot).</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Replays to new subscribers?</th>
+            <th>Initial value?</th>
+            <th>Common use</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Subject</td>
+            <td>No — only future values</td>
+            <td>No</td>
+            <td>Events, user actions</td>
+          </tr>
+          <tr>
+            <td>BehaviorSubject</td>
+            <td>Yes — last 1 value</td>
+            <td>Required</td>
+            <td>Current state (most common)</td>
+          </tr>
+          <tr>
+            <td>ReplaySubject(n)</td>
+            <td>Yes — last n values</td>
+            <td>No</td>
+            <td>Caching recent history</td>
+          </tr>
+          <tr>
+            <td>AsyncSubject</td>
+            <td>Yes — last value on complete</td>
+            <td>No</td>
+            <td>Rare: one-shot result</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>BehaviorSubject — the most useful one</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>behavior-subject.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="cls">BehaviorSubject</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+
+<span class="cm">// Must have an initial value</span>
+<span class="kw">const</span> <span class="fn">count$</span> = <span class="kw">new</span> <span class="cls">BehaviorSubject</span>&lt;<span class="cls">number</span>&gt;(<span class="num">0</span>);
+
+<span class="cm">// Subscribe A before any values are pushed</span>
+<span class="fn">count$</span>.<span class="fn">subscribe</span>(<span class="fn">v</span> <span class="op">=></span> <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'A:'</span>, <span class="fn">v</span>)); <span class="cm">// A: 0 (immediately!)</span>
+
+<span class="fn">count$</span>.<span class="fn">next</span>(<span class="num">1</span>); <span class="cm">// A: 1</span>
+<span class="fn">count$</span>.<span class="fn">next</span>(<span class="num">2</span>); <span class="cm">// A: 2</span>
+
+<span class="cm">// Late subscriber gets the LAST value immediately</span>
+<span class="fn">count$</span>.<span class="fn">subscribe</span>(<span class="fn">v</span> <span class="op">=></span> <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'B:'</span>, <span class="fn">v</span>)); <span class="cm">// B: 2</span>
+
+<span class="cm">// Read current value synchronously (no subscribe needed)</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="fn">count$</span>.<span class="fn">value</span>); <span class="cm">// 2</span></pre>
+      </div>
+
+      <h3>State service pattern with BehaviorSubject</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>cart.service.ts</span>
+        </div>
+        <pre><span class="kw">@Injectable</span>({ <span class="fn">providedIn</span>: <span class="str">'root'</span> })
+<span class="kw">export class</span> <span class="cls">CartService</span> {
+  <span class="cm">// Private: only this service can push new values</span>
+  <span class="kw">private</span> <span class="fn">items$</span> = <span class="kw">new</span> <span class="cls">BehaviorSubject</span>&lt;<span class="cls">CartItem</span>[]&gt;([]);
+
+  <span class="cm">// Public: components only read, never write directly</span>
+  <span class="kw">readonly</span> <span class="fn">items</span> = <span class="fn">this</span>.<span class="fn">items$</span>.<span class="fn">asObservable</span>();
+  <span class="kw">readonly</span> <span class="fn">count$</span> = <span class="fn">this</span>.<span class="fn">items</span>.<span class="fn">pipe</span>(<span class="fn">map</span>((<span class="fn">i</span>) <span class="op">=></span> <span class="fn">i</span>.<span class="fn">length</span>));
+
+  <span class="fn">addItem</span>(<span class="fn">item</span>: <span class="cls">CartItem</span>) {
+    <span class="fn">this</span>.<span class="fn">items$</span>.<span class="fn">next</span>([...<span class="fn">this</span>.<span class="fn">items$</span>.<span class="fn">value</span>, <span class="fn">item</span>]);
+  }
+
+  <span class="fn">clear</span>() {
+    <span class="fn">this</span>.<span class="fn">items$</span>.<span class="fn">next</span>([]);
+  }
+}
+
+<span class="cm">// In component template:</span>
+<span class="cm">// &lt;span&gt;{{ cartService.count$ | async }} items&lt;/span&gt;</span></pre>
+      </div>
+
+      <h3>ReplaySubject — buffer recent history</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>replay-subject.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="cls">ReplaySubject</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+
+<span class="cm">// Keeps last 3 values in buffer</span>
+<span class="kw">const</span> <span class="fn">log$</span> = <span class="kw">new</span> <span class="cls">ReplaySubject</span>&lt;<span class="cls">string</span>&gt;(<span class="num">3</span>);
+
+<span class="fn">log$</span>.<span class="fn">next</span>(<span class="str">'Event 1'</span>);
+<span class="fn">log$</span>.<span class="fn">next</span>(<span class="str">'Event 2'</span>);
+<span class="fn">log$</span>.<span class="fn">next</span>(<span class="str">'Event 3'</span>);
+<span class="fn">log$</span>.<span class="fn">next</span>(<span class="str">'Event 4'</span>); <span class="cm">// 1 is dropped, buffer is [2, 3, 4]</span>
+
+<span class="cm">// Late subscriber gets the buffered 3 immediately</span>
+<span class="fn">log$</span>.<span class="fn">subscribe</span>(<span class="fn">e</span> <span class="op">=></span> <span class="fn">console</span>.<span class="fn">log</span>(<span class="fn">e</span>));
+<span class="cm">// Event 2, Event 3, Event 4</span></pre>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════ SECTION 7 -->
+    <section id="s7">
+      <div class="section-label">Operators</div>
+      <h2>7. map / filter / tap</h2>
+      <p>These are the bread-and-butter operators. They live inside <code>.pipe()</code> and transform every emission.
+      </p>
+
+      <h3>map — transform each value</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>map.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">map</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="cm">// Transform HTTP response to just the data you need</span>
+<span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">get</span>&lt;<span class="cls">ApiResponse</span>&gt;(<span class="str">'/api/employees'</span>).<span class="fn">pipe</span>(
+  <span class="fn">map</span>((<span class="fn">res</span>) <span class="op">=></span> <span class="fn">res</span>.<span class="fn">data</span>),                          <span class="cm">// unwrap wrapper</span>
+  <span class="fn">map</span>((<span class="fn">employees</span>) <span class="op">=></span> <span class="fn">employees</span>.<span class="fn">filter</span>(<span class="fn">e</span> <span class="op">=></span> <span class="fn">e</span>.<span class="fn">active</span>)) <span class="cm">// filter array</span>
+).<span class="fn">subscribe</span>(<span class="fn">employees</span> <span class="op">=></span> <span class="fn">this</span>.<span class="fn">employees</span> = <span class="fn">employees</span>);
+
+<span class="cm">// Map router params to a number</span>
+<span class="fn">this</span>.<span class="fn">route</span>.<span class="fn">paramMap</span>.<span class="fn">pipe</span>(
+  <span class="fn">map</span>((<span class="fn">params</span>) <span class="op">=></span> <span class="cls">Number</span>(<span class="fn">params</span>.<span class="fn">get</span>(<span class="str">'id'</span>)))
+).<span class="fn">subscribe</span>(<span class="fn">id</span> <span class="op">=></span> <span class="fn">this</span>.<span class="fn">loadEmployee</span>(<span class="fn">id</span>));</pre>
+      </div>
+
+      <h3>filter — only let matching values through</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>filter.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">filter</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="cm">// Only react to keyboard shortcuts</span>
+<span class="fn">fromEvent</span>&lt;<span class="cls">KeyboardEvent</span>&gt;(<span class="fn">document</span>, <span class="str">'keydown'</span>).<span class="fn">pipe</span>(
+  <span class="fn">filter</span>((<span class="fn">e</span>) <span class="op">=></span> <span class="fn">e</span>.<span class="fn">ctrlKey</span> <span class="op">&amp;&amp;</span> <span class="fn">e</span>.<span class="fn">key</span> === <span class="str">'s'</span>)
+).<span class="fn">subscribe</span>(() <span class="op">=></span> <span class="fn">this</span>.<span class="fn">save</span>());
+
+<span class="cm">// Only emit non-null values (type-safe null check)</span>
+<span class="fn">this</span>.<span class="fn">userService</span>.<span class="fn">currentUser$</span>.<span class="fn">pipe</span>(
+  <span class="fn">filter</span>((<span class="fn">user</span>): <span class="fn">user</span> <span class="kw">is</span> <span class="cls">User</span> <span class="op">=></span> <span class="fn">user</span> !== <span class="kw">null</span>)
+).<span class="fn">subscribe</span>((<span class="fn">user</span>) <span class="op">=></span> <span class="fn">this</span>.<span class="fn">loadProfile</span>(<span class="fn">user</span>.<span class="fn">id</span>));</pre>
+      </div>
+
+      <h3>tap — side effects without changing the stream</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>tap.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">tap</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="cm">// Logging / debugging — tap doesn't alter the value</span>
+<span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">get</span>&lt;<span class="cls">User</span>[]&gt;(<span class="str">'/api/users'</span>).<span class="fn">pipe</span>(
+  <span class="fn">tap</span>((<span class="fn">users</span>) <span class="op">=></span> <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Users loaded:'</span>, <span class="fn">users</span>.<span class="fn">length</span>)),
+  <span class="fn">tap</span>(() <span class="op">=></span> <span class="fn">this</span>.<span class="fn">loading</span> = <span class="kw">false</span>),         <span class="cm">// hide spinner</span>
+  <span class="fn">map</span>((<span class="fn">users</span>) <span class="op">=></span> <span class="fn">users</span>.<span class="fn">filter</span>(<span class="fn">u</span> <span class="op">=></span> <span class="fn">u</span>.<span class="fn">active</span>))
+).<span class="fn">subscribe</span>((<span class="fn">users</span>) <span class="op">=></span> <span class="fn">this</span>.<span class="fn">users</span> = <span class="fn">users</span>);</pre>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════ SECTION 8 -->
+    <section id="s8">
+      <div class="section-label">Operators</div>
+      <h2>8. Higher-order mapping operators</h2>
+      <p>These operators map each emission to a <em>new Observable</em>, then flatten the result. The difference is in
+        how they handle <strong>overlapping inner observables</strong>.</p>
+
+      <div class="callout warn">
+        <span class="callout-icon">⚠️</span>
+        <p><strong>This is the most important group to master.</strong> Choosing the wrong one causes stale responses,
+          missed clicks, or doubled requests.</p>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Operator</th>
+            <th>Overlap strategy</th>
+            <th>Best for</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>switchMap</td>
+            <td>Cancels previous inner observable</td>
+            <td>Search, autocomplete, nav</td>
+          </tr>
+          <tr>
+            <td>mergeMap</td>
+            <td>Runs all concurrently</td>
+            <td>Parallel independent requests</td>
+          </tr>
+          <tr>
+            <td>concatMap</td>
+            <td>Queues — waits for each to finish</td>
+            <td>Ordered sequential actions</td>
+          </tr>
+          <tr>
+            <td>exhaustMap</td>
+            <td>Ignores new until current finishes</td>
+            <td>Login, form submit, prevent double-click</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>switchMap — cancel the previous, use the latest</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>switchMap.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">switchMap</span>, <span class="fn">debounceTime</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="cm">// Classic search: if user types again before the HTTP response,</span>
+<span class="cm">// the previous request is CANCELLED — no stale results</span>
+<span class="fn">this</span>.<span class="fn">searchControl</span>.<span class="fn">valueChanges</span>.<span class="fn">pipe</span>(
+  <span class="fn">debounceTime</span>(<span class="num">300</span>),
+  <span class="fn">switchMap</span>((<span class="fn">query</span>) <span class="op">=></span> <span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">get</span>&lt;<span class="cls">Result</span>[]&gt;(<span class="str">`/api/search?q=<span class="acc">${query}</span>`</span>))
+).<span class="fn">subscribe</span>((<span class="fn">results</span>) <span class="op">=></span> <span class="fn">this</span>.<span class="fn">results</span> = <span class="fn">results</span>);
+
+<span class="cm">// Also used for route-driven data loading</span>
+<span class="fn">this</span>.<span class="fn">route</span>.<span class="fn">paramMap</span>.<span class="fn">pipe</span>(
+  <span class="fn">switchMap</span>((<span class="fn">params</span>) <span class="op">=></span>
+    <span class="fn">this</span>.<span class="fn">empService</span>.<span class="fn">getEmployee</span>(<span class="cls">Number</span>(<span class="fn">params</span>.<span class="fn">get</span>(<span class="str">'id'</span>)))
+  )
+).<span class="fn">subscribe</span>((<span class="fn">emp</span>) <span class="op">=></span> <span class="fn">this</span>.<span class="fn">employee</span> = <span class="fn">emp</span>);</pre>
+      </div>
+
+      <h3>mergeMap — run all concurrently</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>mergeMap.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">mergeMap</span>, <span class="fn">from</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+
+<span class="cm">// Upload multiple files simultaneously — all requests fire at once</span>
+<span class="fn">from</span>(<span class="fn">this</span>.<span class="fn">selectedFiles</span>).<span class="fn">pipe</span>(
+  <span class="fn">mergeMap</span>((<span class="fn">file</span>) <span class="op">=></span> <span class="fn">this</span>.<span class="fn">uploadService</span>.<span class="fn">upload</span>(<span class="fn">file</span>))
+).<span class="fn">subscribe</span>({
+  <span class="fn">next</span>:     (<span class="fn">result</span>) <span class="op">=></span> <span class="fn">this</span>.<span class="fn">uploaded</span>.<span class="fn">push</span>(<span class="fn">result</span>),
+  <span class="fn">complete</span>: ()       <span class="op">=></span> <span class="fn">this</span>.<span class="fn">showSuccess</span>(<span class="str">'All files uploaded'</span>)
+});</pre>
+      </div>
+
+      <h3>concatMap — queue one at a time, in order</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>concatMap.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">concatMap</span>, <span class="fn">from</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+
+<span class="cm">// Save steps in strict order: step 2 only starts after step 1 finishes</span>
+<span class="fn">from</span>([<span class="fn">step1Payload</span>, <span class="fn">step2Payload</span>, <span class="fn">step3Payload</span>]).<span class="fn">pipe</span>(
+  <span class="fn">concatMap</span>((<span class="fn">payload</span>) <span class="op">=></span> <span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">post</span>(<span class="str">'/api/save'</span>, <span class="fn">payload</span>))
+).<span class="fn">subscribe</span>({
+  <span class="fn">next</span>:     (<span class="fn">res</span>) <span class="op">=></span> <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Step saved:'</span>, <span class="fn">res</span>),
+  <span class="fn">complete</span>: ()    <span class="op">=></span> <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'All steps done in order'</span>)
+});</pre>
+      </div>
+
+      <h3>exhaustMap — ignore while busy</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>exhaustMap.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">exhaustMap</span>, <span class="fn">fromEvent</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+
+<span class="cm">// Prevent double-submit: if login is in progress, extra clicks are ignored</span>
+<span class="fn">fromEvent</span>(<span class="fn">this</span>.<span class="fn">loginBtn</span>.<span class="fn">nativeElement</span>, <span class="str">'click'</span>).<span class="fn">pipe</span>(
+  <span class="fn">exhaustMap</span>(() <span class="op">=></span> <span class="fn">this</span>.<span class="fn">authService</span>.<span class="fn">login</span>(<span class="fn">this</span>.<span class="fn">credentials</span>))
+).<span class="fn">subscribe</span>({
+  <span class="fn">next</span>:  (<span class="fn">res</span>) <span class="op">=></span> <span class="fn">this</span>.<span class="fn">router</span>.<span class="fn">navigate</span>([<span class="str">'/home'</span>]),
+  <span class="fn">error</span>: (<span class="fn">err</span>) <span class="op">=></span> <span class="fn">this</span>.<span class="fn">showError</span>(<span class="fn">err</span>)
+});</pre>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════ SECTION 9 -->
+    <section id="s9">
+      <div class="section-label">Operators</div>
+      <h2>9. Time operators</h2>
+
+      <h3>debounceTime — wait for silence</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>debounce.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">debounceTime</span>, <span class="fn">distinctUntilChanged</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="cm">// Only emit after user stops typing for 400ms</span>
+<span class="fn">this</span>.<span class="fn">searchControl</span>.<span class="fn">valueChanges</span>.<span class="fn">pipe</span>(
+  <span class="fn">debounceTime</span>(<span class="num">400</span>),
+  <span class="fn">distinctUntilChanged</span>() <span class="cm">// skip if value didn't change</span>
+).<span class="fn">subscribe</span>((<span class="fn">query</span>) <span class="op">=></span> <span class="fn">this</span>.<span class="fn">doSearch</span>(<span class="fn">query</span>));
+<span class="cm">// User types "ang" — only fires once after 400ms, not on each key</span></pre>
+      </div>
+
+      <h3>throttleTime — at most once per interval</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>throttle.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">throttleTime</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="cm">// Handle scroll events at most once every 100ms</span>
+<span class="fn">fromEvent</span>(<span class="fn">window</span>, <span class="str">'scroll'</span>).<span class="fn">pipe</span>(
+  <span class="fn">throttleTime</span>(<span class="num">100</span>)
+).<span class="fn">subscribe</span>(() <span class="op">=></span> <span class="fn">this</span>.<span class="fn">checkScrollPosition</span>());
+
+<span class="cm">// debounce vs throttle:</span>
+<span class="cm">// debounce: waits for user to STOP typing → good for search</span>
+<span class="cm">// throttle: fires at a regular pace while events continue → good for scroll/resize</span></pre>
+      </div>
+
+      <h3>distinctUntilChanged — skip duplicate consecutive values</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>distinct.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">distinctUntilChanged</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="cm">// Avoid re-rendering if the user ID didn't change</span>
+<span class="fn">this</span>.<span class="fn">authService</span>.<span class="fn">user$</span>.<span class="fn">pipe</span>(
+  <span class="fn">map</span>((<span class="fn">u</span>) <span class="op">=></span> <span class="fn">u</span>?.<span class="fn">id</span>),
+  <span class="fn">distinctUntilChanged</span>() <span class="cm">// only emits if id changed</span>
+).<span class="fn">subscribe</span>((<span class="fn">id</span>) <span class="op">=></span> <span class="fn">this</span>.<span class="fn">loadUserData</span>(<span class="fn">id</span>));
+
+<span class="cm">// With a custom comparator</span>
+<span class="fn">formControl</span>.<span class="fn">valueChanges</span>.<span class="fn">pipe</span>(
+  <span class="fn">distinctUntilChanged</span>((<span class="fn">a</span>, <span class="fn">b</span>) <span class="op">=></span> <span class="fn">a</span>.<span class="fn">toLowerCase</span>() === <span class="fn">b</span>.<span class="fn">toLowerCase</span>())
+).<span class="fn">subscribe</span>(...);</pre>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════ SECTION 10 -->
+    <section id="s10">
+      <div class="section-label">Operators</div>
+      <h2>10. Limiting operators</h2>
+
+      <h3>take — complete after N values</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>take.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">take</span>, <span class="fn">first</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="cm">// Take only the first emission, then auto-complete</span>
+<span class="fn">this</span>.<span class="fn">userService</span>.<span class="fn">user$</span>.<span class="fn">pipe</span>(
+  <span class="fn">take</span>(<span class="num">1</span>) <span class="cm">// equivalent to first()</span>
+).<span class="fn">subscribe</span>((<span class="fn">user</span>) <span class="op">=></span> <span class="fn">this</span>.<span class="fn">doOneTimeInit</span>(<span class="fn">user</span>));
+
+<span class="cm">// first() — same as take(1) but can include a predicate</span>
+<span class="fn">this</span>.<span class="fn">items$</span>.<span class="fn">pipe</span>(
+  <span class="fn">first</span>((<span class="fn">items</span>) <span class="op">=></span> <span class="fn">items</span>.<span class="fn">length</span> <span class="op">></span> <span class="num">0</span>) <span class="cm">// first non-empty array</span>
+).<span class="fn">subscribe</span>(...);</pre>
+      </div>
+
+      <h3>takeUntil — complete when a notifier emits</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>takeUntil.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="cls">Subject</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+<span class="kw">import</span> { <span class="fn">takeUntil</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="kw">@Component</span>({ ... })
+<span class="kw">export class</span> <span class="cls">MyComponent</span> <span class="kw">implements</span> <span class="cls">OnDestroy</span> {
+  <span class="kw">private</span> <span class="fn">destroy$</span> = <span class="kw">new</span> <span class="cls">Subject</span>&lt;<span class="kw">void</span>&gt;();
+
+  <span class="fn">ngOnInit</span>() {
+    <span class="cm">// Auto-unsubscribes when destroy$ emits</span>
+    <span class="fn">interval</span>(<span class="num">1000</span>).<span class="fn">pipe</span>(
+      <span class="fn">takeUntil</span>(<span class="fn">this</span>.<span class="fn">destroy$</span>)
+    ).<span class="fn">subscribe</span>((<span class="fn">n</span>) <span class="op">=></span> <span class="fn">console</span>.<span class="fn">log</span>(<span class="fn">n</span>));
+  }
+
+  <span class="fn">ngOnDestroy</span>() {
+    <span class="fn">this</span>.<span class="fn">destroy$</span>.<span class="fn">next</span>();    <span class="cm">// triggers completion</span>
+    <span class="fn">this</span>.<span class="fn">destroy$</span>.<span class="fn">complete</span>(); <span class="cm">// cleanup Subject itself</span>
+  }
+}</pre>
+      </div>
+
+      <h3>takeUntilDestroyed — Angular 16+ (recommended)</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>takeUntilDestroyed.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">takeUntilDestroyed</span> } <span class="kw">from</span> <span class="str">'@angular/core/rxjs-interop'</span>;
+<span class="kw">import</span> { <span class="fn">inject</span>, <span class="cls">DestroyRef</span> } <span class="kw">from</span> <span class="str">'@angular/core'</span>;
+
+<span class="kw">@Component</span>({ ... })
+<span class="kw">export class</span> <span class="cls">MyComponent</span> {
+  <span class="kw">private</span> <span class="fn">destroyRef</span> = <span class="fn">inject</span>(<span class="cls">DestroyRef</span>); <span class="cm">// no OnDestroy needed</span>
+
+  <span class="fn">ngOnInit</span>() {
+    <span class="fn">interval</span>(<span class="num">1000</span>).<span class="fn">pipe</span>(
+      <span class="fn">takeUntilDestroyed</span>(<span class="fn">this</span>.<span class="fn">destroyRef</span>)
+    ).<span class="fn">subscribe</span>((<span class="fn">n</span>) <span class="op">=></span> <span class="fn">console</span>.<span class="fn">log</span>(<span class="fn">n</span>));
+    <span class="cm">// Automatically unsubscribes when component is destroyed</span>
+  }
+}</pre>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════ SECTION 11 -->
+    <section id="s11">
+      <div class="section-label">Operators</div>
+      <h2>11. Combination operators</h2>
+
+      <h3>combineLatest — combine latest from multiple streams</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>combineLatest.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">combineLatest</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+
+<span class="cm">// Emits whenever EITHER stream updates — waits for all to emit once first</span>
+<span class="fn">combineLatest</span>({
+  <span class="fn">user</span>:    <span class="fn">this</span>.<span class="fn">userService</span>.<span class="fn">currentUser$</span>,
+  <span class="fn">filters</span>: <span class="fn">this</span>.<span class="fn">filterService</span>.<span class="fn">activeFilters$</span>,
+  <span class="fn">page</span>:    <span class="fn">this</span>.<span class="fn">paginationService</span>.<span class="fn">page$</span>,
+}).<span class="fn">pipe</span>(
+  <span class="fn">switchMap</span>(({ <span class="fn">user</span>, <span class="fn">filters</span>, <span class="fn">page</span> }) <span class="op">=></span>
+    <span class="fn">this</span>.<span class="fn">dataService</span>.<span class="fn">getData</span>({ <span class="fn">userId</span>: <span class="fn">user</span>.<span class="fn">id</span>, <span class="fn">filters</span>, <span class="fn">page</span> })
+  )
+).<span class="fn">subscribe</span>((<span class="fn">data</span>) <span class="op">=></span> <span class="fn">this</span>.<span class="fn">tableData</span> = <span class="fn">data</span>);</pre>
+      </div>
+
+      <h3>forkJoin — parallel requests, wait for all to finish</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>forkJoin.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">forkJoin</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+
+<span class="cm">// Load all data needed for a page in parallel</span>
+<span class="cm">// Emits once when ALL complete, with the last value of each</span>
+<span class="fn">forkJoin</span>({
+  <span class="fn">employee</span>:    <span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">get</span>&lt;<span class="cls">Employee</span>&gt;(<span class="str">`/api/employees/<span class="acc">${id}</span>`</span>),
+  <span class="fn">departments</span>: <span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">get</span>&lt;<span class="cls">Department</span>[]&gt;(<span class="str">'/api/departments'</span>),
+  <span class="fn">roles</span>:        <span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">get</span>&lt;<span class="cls">Role</span>[]&gt;(<span class="str">'/api/roles'</span>),
+}).<span class="fn">subscribe</span>(({ <span class="fn">employee</span>, <span class="fn">departments</span>, <span class="fn">roles</span> }) <span class="op">=></span> {
+  <span class="fn">this</span>.<span class="fn">employee</span>    = <span class="fn">employee</span>;
+  <span class="fn">this</span>.<span class="fn">departments</span> = <span class="fn">departments</span>;
+  <span class="fn">this</span>.<span class="fn">roles</span>        = <span class="fn">roles</span>;
+  <span class="fn">this</span>.<span class="fn">loading</span>      = <span class="kw">false</span>;
+});
+
+<span class="cm">// IMPORTANT: forkJoin requires all streams to COMPLETE.</span>
+<span class="cm">// HttpClient does — but Subject/BehaviorSubject never does.</span></pre>
+      </div>
+
+      <h3>withLatestFrom — combine on one stream's timing</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>withLatestFrom.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">withLatestFrom</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="cm">// When save button is clicked, grab the latest form value + user</span>
+<span class="fn">this</span>.<span class="fn">saveClicks$</span>.<span class="fn">pipe</span>(
+  <span class="fn">withLatestFrom</span>(<span class="fn">this</span>.<span class="fn">form</span>.<span class="fn">valueChanges</span>, <span class="fn">this</span>.<span class="fn">userService</span>.<span class="fn">user$</span>)
+).<span class="fn">subscribe</span>(([<span class="fn">_click</span>, <span class="fn">formValue</span>, <span class="fn">user</span>]) <span class="op">=></span> {
+  <span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">post</span>(<span class="str">'/api/save'</span>, { ...<span class="fn">formValue</span>, <span class="fn">userId</span>: <span class="fn">user</span>.<span class="fn">id</span> });
+});</pre>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════ SECTION 12 -->
+    <section id="s12">
+      <div class="section-label">Operators</div>
+      <h2>12. Error handling</h2>
+
+      <div class="callout info">
+        <span class="callout-icon">💡</span>
+        <p>When an Observable errors, the stream <strong>terminates</strong>. Error handling operators let you recover
+          and keep the stream alive.</p>
+      </div>
+
+      <h3>catchError — recover and continue</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>catchError.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">catchError</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+<span class="kw">import</span> { <span class="fn">of</span>, <span class="cls">EMPTY</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+
+<span class="cm">// Return empty array on error — page shows nothing instead of crashing</span>
+<span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">get</span>&lt;<span class="cls">User</span>[]&gt;(<span class="str">'/api/users'</span>).<span class="fn">pipe</span>(
+  <span class="fn">catchError</span>((<span class="fn">err</span>) <span class="op">=></span> {
+    <span class="fn">console</span>.<span class="fn">error</span>(<span class="fn">err</span>);
+    <span class="kw">return</span> <span class="fn">of</span>([]); <span class="cm">// fallback value</span>
+  })
+).<span class="fn">subscribe</span>((<span class="fn">users</span>) <span class="op">=></span> <span class="fn">this</span>.<span class="fn">users</span> = <span class="fn">users</span>);
+
+<span class="cm">// Rethrow after doing something (e.g. logging)</span>
+<span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">get</span>(<span class="str">'/api/data'</span>).<span class="fn">pipe</span>(
+  <span class="fn">catchError</span>((<span class="fn">err</span>) <span class="op">=></span> {
+    <span class="fn">this</span>.<span class="fn">logService</span>.<span class="fn">log</span>(<span class="fn">err</span>);
+    <span class="fn">this</span>.<span class="fn">errorMsg</span> = <span class="fn">err</span>.<span class="fn">message</span>;
+    <span class="kw">return</span> <span class="cls">EMPTY</span>; <span class="cm">// complete silently without a value</span>
+  })
+);</pre>
+      </div>
+
+      <h3>retry — automatically retry on error</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>retry.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">retry</span>, <span class="fn">catchError</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+<span class="kw">import</span> { <span class="fn">of</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+
+<span class="cm">// Retry up to 3 times before giving up</span>
+<span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">get</span>&lt;<span class="cls">Data</span>&gt;(<span class="str">'/api/flaky-endpoint'</span>).<span class="fn">pipe</span>(
+  <span class="fn">retry</span>(<span class="num">3</span>),
+  <span class="fn">catchError</span>((<span class="fn">err</span>) <span class="op">=></span> {
+    <span class="fn">this</span>.<span class="fn">errorMsg</span> = <span class="str">'Failed after 3 attempts'</span>;
+    <span class="kw">return</span> <span class="fn">of</span>(<span class="kw">null</span>);
+  })
+).<span class="fn">subscribe</span>(...);</pre>
+      </div>
+
+      <h3>finalize — always runs (like try/finally)</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>finalize.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">finalize</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="cm">// Hide spinner whether request succeeds, fails, or is cancelled</span>
+<span class="fn">this</span>.<span class="fn">loading</span> = <span class="kw">true</span>;
+<span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">get</span>&lt;<span class="cls">User</span>[]&gt;(<span class="str">'/api/users'</span>).<span class="fn">pipe</span>(
+  <span class="fn">finalize</span>(() <span class="op">=></span> <span class="fn">this</span>.<span class="fn">loading</span> = <span class="kw">false</span>) <span class="cm">// always runs at the end</span>
+).<span class="fn">subscribe</span>({
+  <span class="fn">next</span>:  (<span class="fn">users</span>) <span class="op">=></span> <span class="fn">this</span>.<span class="fn">users</span> = <span class="fn">users</span>,
+  <span class="fn">error</span>: (<span class="fn">err</span>)   <span class="op">=></span> <span class="fn">this</span>.<span class="fn">errorMsg</span> = <span class="fn">err</span>.<span class="fn">message</span>,
+});</pre>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════ SECTION 13 -->
+    <section id="s13">
+      <div class="section-label">Operators</div>
+      <h2>13. shareReplay — multicast &amp; cache</h2>
+      <p><code>shareReplay</code> makes a cold observable hot and caches the last N emissions for new subscribers.
+        Critical for avoiding duplicate HTTP requests.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>shareReplay.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">shareReplay</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="cm">// Without shareReplay: 3 subscribers = 3 HTTP requests</span>
+<span class="kw">const</span> <span class="fn">user$</span> = <span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">get</span>&lt;<span class="cls">User</span>&gt;(<span class="str">'/api/me'</span>);
+
+<span class="cm">// With shareReplay(1): only 1 request, result cached and shared</span>
+<span class="kw">readonly</span> <span class="fn">user$</span> = <span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">get</span>&lt;<span class="cls">User</span>&gt;(<span class="str">'/api/me'</span>).<span class="fn">pipe</span>(
+  <span class="fn">shareReplay</span>(<span class="num">1</span>) <span class="cm">// buffer 1 value, share with all subscribers</span>
+);
+
+<span class="cm">// All three get the same response from a single HTTP call:</span>
+<span class="fn">this</span>.<span class="fn">user$</span>.<span class="fn">subscribe</span>(<span class="fn">u</span> <span class="op">=></span> <span class="fn">this</span>.<span class="fn">header</span>.<span class="fn">setUser</span>(<span class="fn">u</span>));
+<span class="fn">this</span>.<span class="fn">user$</span>.<span class="fn">subscribe</span>(<span class="fn">u</span> <span class="op">=></span> <span class="fn">this</span>.<span class="fn">sidebar</span>.<span class="fn">setUser</span>(<span class="fn">u</span>));
+<span class="fn">this</span>.<span class="fn">user$</span>.<span class="fn">subscribe</span>(<span class="fn">u</span> <span class="op">=></span> <span class="fn">this</span>.<span class="fn">analytics</span>.<span class="fn">track</span>(<span class="fn">u</span>));</pre>
+      </div>
+
+      <h3>Use in a service for cached data</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>cached-service.ts</span>
+        </div>
+        <pre><span class="kw">@Injectable</span>({ <span class="fn">providedIn</span>: <span class="str">'root'</span> })
+<span class="kw">export class</span> <span class="cls">ReferenceDataService</span> {
+  <span class="cm">// Fetched once, cached forever for all components</span>
+  <span class="kw">readonly</span> <span class="fn">departments$</span>: <span class="cls">Observable</span>&lt;<span class="cls">Department</span>[]&gt; =
+    <span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">get</span>&lt;<span class="cls">Department</span>[]&gt;(<span class="str">'/api/departments'</span>).<span class="fn">pipe</span>(
+      <span class="fn">shareReplay</span>(<span class="num">1</span>)
+    );
+
+  <span class="kw">readonly</span> <span class="fn">roles$</span>: <span class="cls">Observable</span>&lt;<span class="cls">Role</span>[]&gt; =
+    <span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">get</span>&lt;<span class="cls">Role</span>[]&gt;(<span class="str">'/api/roles'</span>).<span class="fn">pipe</span>(
+      <span class="fn">shareReplay</span>(<span class="num">1</span>)
+    );
+}</pre>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════ SECTION 14 -->
+    <section id="s14">
+      <div class="section-label">Angular Patterns</div>
+      <h2>14. The async pipe</h2>
+      <p>The async pipe subscribes to an Observable in the template and <strong>automatically unsubscribes</strong> when
+        the component is destroyed. It's the cleanest way to use Observables in Angular.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>users.component.ts</span>
+        </div>
+        <pre><span class="kw">@Component</span>({
+  <span class="fn">template</span>: <span class="str">`
+    &lt;<span class="tag">div</span> <span class="kw">*ngIf</span>="<span class="fn">users$ | async</span> as <span class="fn">users</span>; else <span class="fn">loading</span>"&gt;
+      &lt;<span class="tag">div</span> <span class="kw">*ngFor</span>="<span class="kw">let</span> <span class="fn">user</span> of <span class="fn">users</span>"&gt;{{ user.name }}&lt;/<span class="tag">div</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+
+    &lt;<span class="tag">ng-template</span> <span class="kw">#loading</span>&gt;Loading...&lt;/<span class="tag">ng-template</span>&gt;
+  `</span>
+})
+<span class="kw">export class</span> <span class="cls">UsersComponent</span> {
+  <span class="cm">// No subscribe(), no ngOnDestroy(), no Subscription variable</span>
+  <span class="fn">users$</span> = <span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">get</span>&lt;<span class="cls">User</span>[]&gt;(<span class="str">'/api/users'</span>);
+}</pre>
+      </div>
+
+      <h3>Combining multiple streams in template with combineLatest</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>dashboard.component.ts</span>
+        </div>
+        <pre><span class="kw">export class</span> <span class="cls">DashboardComponent</span> {
+  <span class="cm">// Combine into a single stream to avoid multiple async pipes</span>
+  <span class="fn">vm$</span> = <span class="fn">combineLatest</span>({
+    <span class="fn">user</span>:   <span class="fn">this</span>.<span class="fn">userService</span>.<span class="fn">user$</span>,
+    <span class="fn">stats</span>:  <span class="fn">this</span>.<span class="fn">statsService</span>.<span class="fn">stats$</span>,
+    <span class="fn">alerts</span>: <span class="fn">this</span>.<span class="fn">alertService</span>.<span class="fn">alerts$</span>,
+  });
+}
+
+<span class="cm">// Template:
+// &lt;div *ngIf="vm$ | async as vm"&gt;
+//   &lt;h1&gt;Welcome, {{ vm.user.name }}&lt;/h1&gt;
+//   &lt;app-stats [data]="vm.stats"&gt;&lt;/app-stats&gt;
+//   &lt;app-alerts [items]="vm.alerts"&gt;&lt;/app-alerts&gt;
+// &lt;/div&gt;</span></pre>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════ SECTION 15 -->
+    <section id="s15">
+      <div class="section-label">Angular Patterns</div>
+      <h2>15. Reactive forms + RxJS</h2>
+
+      <h3>valueChanges — react to form input</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>search.component.ts</span>
+        </div>
+        <pre><span class="kw">export class</span> <span class="cls">SearchComponent</span> <span class="kw">implements</span> <span class="cls">OnInit</span> {
+  <span class="fn">searchControl</span> = <span class="kw">new</span> <span class="cls">FormControl</span>(<span class="str">''</span>);
+  <span class="fn">results$</span>!: <span class="cls">Observable</span>&lt;<span class="cls">SearchResult</span>[]&gt;;
+
+  <span class="fn">ngOnInit</span>() {
+    <span class="fn">this</span>.<span class="fn">results$</span> = <span class="fn">this</span>.<span class="fn">searchControl</span>.<span class="fn">valueChanges</span>.<span class="fn">pipe</span>(
+      <span class="fn">debounceTime</span>(<span class="num">400</span>),
+      <span class="fn">distinctUntilChanged</span>(),
+      <span class="fn">filter</span>((<span class="fn">q</span>) <span class="op">=></span> (<span class="fn">q</span> ?? <span class="str">''</span>).<span class="fn">length</span> <span class="op">>=</span> <span class="num">2</span>),
+      <span class="fn">switchMap</span>((<span class="fn">q</span>) <span class="op">=></span> <span class="fn">this</span>.<span class="fn">searchService</span>.<span class="fn">search</span>(<span class="fn">q</span> ?? <span class="str">''</span>)),
+      <span class="fn">catchError</span>(() <span class="op">=></span> <span class="fn">of</span>([]))
+    );
+  }
+}
+<span class="cm">// Use {{ results$ | async }} in template — zero subscriptions in .ts</span></pre>
+      </div>
+
+      <h3>statusChanges — react to form validity</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>form.component.ts</span>
+        </div>
+        <pre><span class="fn">ngOnInit</span>() {
+  <span class="cm">// Enable submit button only when form becomes valid</span>
+  <span class="fn">this</span>.<span class="fn">form</span>.<span class="fn">statusChanges</span>.<span class="fn">pipe</span>(
+    <span class="fn">map</span>((<span class="fn">status</span>) <span class="op">=></span> <span class="fn">status</span> === <span class="str">'VALID'</span>),
+    <span class="fn">distinctUntilChanged</span>(),
+    <span class="fn">takeUntilDestroyed</span>(<span class="fn">this</span>.<span class="fn">destroyRef</span>)
+  ).<span class="fn">subscribe</span>((<span class="fn">valid</span>) <span class="op">=></span> <span class="fn">this</span>.<span class="fn">submitEnabled</span> = <span class="fn">valid</span>);
+
+  <span class="cm">// Cross-field dependency: show/hide a field based on another</span>
+  <span class="fn">this</span>.<span class="fn">form</span>.<span class="fn">get</span>(<span class="str">'hasAddress'</span>)!.<span class="fn">valueChanges</span>.<span class="fn">pipe</span>(
+    <span class="fn">takeUntilDestroyed</span>(<span class="fn">this</span>.<span class="fn">destroyRef</span>)
+  ).<span class="fn">subscribe</span>((<span class="fn">hasAddress</span>) <span class="op">=></span> {
+    <span class="kw">if</span> (<span class="fn">hasAddress</span>) <span class="fn">this</span>.<span class="fn">form</span>.<span class="fn">get</span>(<span class="str">'address'</span>)!.<span class="fn">enable</span>();
+    <span class="kw">else</span>            <span class="fn">this</span>.<span class="fn">form</span>.<span class="fn">get</span>(<span class="str">'address'</span>)!.<span class="fn">disable</span>();
+  });
+}</pre>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════ SECTION 16 -->
+    <section id="s16">
+      <div class="section-label">Angular Patterns</div>
+      <h2>16. Router streams</h2>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>employee-detail.component.ts</span>
+        </div>
+        <pre><span class="kw">export class</span> <span class="cls">EmployeeDetailComponent</span> {
+  <span class="cm">// Stream that auto-loads employee whenever :id changes</span>
+  <span class="fn">employee$</span> = <span class="fn">this</span>.<span class="fn">route</span>.<span class="fn">paramMap</span>.<span class="fn">pipe</span>(
+    <span class="fn">map</span>((<span class="fn">params</span>) <span class="op">=></span> <span class="cls">Number</span>(<span class="fn">params</span>.<span class="fn">get</span>(<span class="str">'id'</span>))),
+    <span class="fn">filter</span>((<span class="fn">id</span>) <span class="op">=></span> !<span class="fn">isNaN</span>(<span class="fn">id</span>)),
+    <span class="fn">switchMap</span>((<span class="fn">id</span>) <span class="op">=></span> <span class="fn">this</span>.<span class="fn">employeeService</span>.<span class="fn">getById</span>(<span class="fn">id</span>)),
+    <span class="fn">catchError</span>(() <span class="op">=></span> {
+      <span class="fn">this</span>.<span class="fn">router</span>.<span class="fn">navigate</span>([<span class="str">'/not-found'</span>]);
+      <span class="kw">return</span> <span class="cls">EMPTY</span>;
+    })
+  );
+
+  <span class="cm">// Query params (filters, pagination)</span>
+  <span class="fn">filters$</span> = <span class="fn">this</span>.<span class="fn">route</span>.<span class="fn">queryParamMap</span>.<span class="fn">pipe</span>(
+    <span class="fn">map</span>((<span class="fn">params</span>) <span class="op">=></span> ({
+      <span class="fn">page</span>:   <span class="cls">Number</span>(<span class="fn">params</span>.<span class="fn">get</span>(<span class="str">'page'</span>)) || <span class="num">1</span>,
+      <span class="fn">status</span>: <span class="fn">params</span>.<span class="fn">get</span>(<span class="str">'status'</span>) ?? <span class="str">'all'</span>,
+    }))
+  );
+
+  <span class="cm">// Router events — show global loading bar</span>
+  <span class="fn">loading$</span> = <span class="fn">this</span>.<span class="fn">router</span>.<span class="fn">events</span>.<span class="fn">pipe</span>(
+    <span class="fn">map</span>((<span class="fn">e</span>) <span class="op">=></span> <span class="fn">e</span> <span class="kw">instanceof</span> <span class="cls">NavigationStart</span>),
+  );
+}</pre>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════ SECTION 17 -->
+    <section id="s17">
+      <div class="section-label">Angular Patterns</div>
+      <h2>17. HttpClient &amp; RxJS</h2>
+
+      <h3>HttpInterceptor for auth + error handling</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>auth.interceptor.ts</span>
+        </div>
+        <pre><span class="kw">@Injectable</span>()
+<span class="kw">export class</span> <span class="cls">AuthInterceptor</span> <span class="kw">implements</span> <span class="cls">HttpInterceptor</span> {
+  <span class="fn">intercept</span>(<span class="fn">req</span>: <span class="cls">HttpRequest</span>&lt;<span class="kw">any</span>&gt;, <span class="fn">next</span>: <span class="cls">HttpHandler</span>) {
+    <span class="kw">const</span> <span class="fn">token</span> = <span class="fn">this</span>.<span class="fn">auth</span>.<span class="fn">getToken</span>();
+    <span class="kw">const</span> <span class="fn">authReq</span> = <span class="fn">token</span>
+      ? <span class="fn">req</span>.<span class="fn">clone</span>({ <span class="fn">setHeaders</span>: { <span class="cls">Authorization</span>: <span class="str">`Bearer <span class="acc">${token}</span>`</span> } })
+      : <span class="fn">req</span>;
+
+    <span class="kw">return</span> <span class="fn">next</span>.<span class="fn">handle</span>(<span class="fn">authReq</span>).<span class="fn">pipe</span>(
+      <span class="fn">catchError</span>((<span class="fn">err</span>: <span class="cls">HttpErrorResponse</span>) <span class="op">=></span> {
+        <span class="kw">if</span> (<span class="fn">err</span>.<span class="fn">status</span> === <span class="num">401</span>) <span class="fn">this</span>.<span class="fn">auth</span>.<span class="fn">logout</span>();
+        <span class="kw">if</span> (<span class="fn">err</span>.<span class="fn">status</span> === <span class="num">503</span>) <span class="fn">this</span>.<span class="fn">toast</span>.<span class="fn">show</span>(<span class="str">'Server unavailable'</span>);
+        <span class="kw">return</span> <span class="fn">throwError</span>(() <span class="op">=></span> <span class="fn">err</span>);
+      })
+    );
+  }
+}</pre>
+      </div>
+
+      <h3>Generic service with typed HTTP calls</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>employee.service.ts</span>
+        </div>
+        <pre><span class="kw">@Injectable</span>({ <span class="fn">providedIn</span>: <span class="str">'root'</span> })
+<span class="kw">export class</span> <span class="cls">EmployeeService</span> {
+  <span class="kw">private</span> <span class="fn">url</span> = <span class="str">'/api/employees'</span>;
+
+  <span class="fn">getAll</span>(): <span class="cls">Observable</span>&lt;<span class="cls">Employee</span>[]&gt; {
+    <span class="kw">return</span> <span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">get</span>&lt;<span class="cls">Employee</span>[]&gt;(<span class="fn">this</span>.<span class="fn">url</span>);
+  }
+
+  <span class="fn">getById</span>(<span class="fn">id</span>: <span class="cls">number</span>): <span class="cls">Observable</span>&lt;<span class="cls">Employee</span>&gt; {
+    <span class="kw">return</span> <span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">get</span>&lt;<span class="cls">Employee</span>&gt;(<span class="str">`<span class="acc">${this.url}</span>/<span class="acc">${id}</span>`</span>);
+  }
+
+  <span class="fn">save</span>(<span class="fn">emp</span>: <span class="cls">Employee</span>): <span class="cls">Observable</span>&lt;<span class="cls">Employee</span>&gt; {
+    <span class="kw">return</span> <span class="fn">emp</span>.<span class="fn">id</span>
+      ? <span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">put</span>&lt;<span class="cls">Employee</span>&gt;(<span class="str">`<span class="acc">${this.url}</span>/<span class="acc">${emp.id}</span>`</span>, <span class="fn">emp</span>)
+      : <span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">post</span>&lt;<span class="cls">Employee</span>&gt;(<span class="fn">this</span>.<span class="fn">url</span>, <span class="fn">emp</span>);
+  }
+
+  <span class="fn">delete</span>(<span class="fn">id</span>: <span class="cls">number</span>): <span class="cls">Observable</span>&lt;<span class="kw">void</span>&gt; {
+    <span class="kw">return</span> <span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">delete</span>&lt;<span class="kw">void</span>&gt;(<span class="str">`<span class="acc">${this.url}</span>/<span class="acc">${id}</span>`</span>);
+  }
+}</pre>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════ SECTION 18 -->
+    <section id="s18">
+      <div class="section-label">Advanced</div>
+      <h2>18. Reactive state service</h2>
+      <p>A common pattern in Angular apps — a service that holds state in a BehaviorSubject and exposes derived streams.
+        No NgRx needed for small-to-medium apps.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>employee-list.service.ts</span>
+        </div>
+        <pre><span class="kw">interface</span> <span class="cls">EmployeeListState</span> {
+  <span class="fn">employees</span>: <span class="cls">Employee</span>[];
+  <span class="fn">loading</span>:   <span class="kw">boolean</span>;
+  <span class="fn">error</span>:     <span class="cls">string</span> | <span class="kw">null</span>;
+  <span class="fn">filter</span>:    <span class="cls">string</span>;
+}
+
+<span class="kw">@Injectable</span>({ <span class="fn">providedIn</span>: <span class="str">'root'</span> })
+<span class="kw">export class</span> <span class="cls">EmployeeListService</span> {
+  <span class="kw">private</span> <span class="fn">state$</span> = <span class="kw">new</span> <span class="cls">BehaviorSubject</span>&lt;<span class="cls">EmployeeListState</span>&gt;({
+    <span class="fn">employees</span>: [],
+    <span class="fn">loading</span>:   <span class="kw">false</span>,
+    <span class="fn">error</span>:     <span class="kw">null</span>,
+    <span class="fn">filter</span>:    <span class="str">''</span>,
+  });
+
+  <span class="cm">// Selectors — derived streams</span>
+  <span class="fn">loading$</span>   = <span class="fn">this</span>.<span class="fn">state$</span>.<span class="fn">pipe</span>(<span class="fn">map</span>((<span class="fn">s</span>) <span class="op">=></span> <span class="fn">s</span>.<span class="fn">loading</span>), <span class="fn">distinctUntilChanged</span>());
+  <span class="fn">error$</span>     = <span class="fn">this</span>.<span class="fn">state$</span>.<span class="fn">pipe</span>(<span class="fn">map</span>((<span class="fn">s</span>) <span class="op">=></span> <span class="fn">s</span>.<span class="fn">error</span>),   <span class="fn">distinctUntilChanged</span>());
+  <span class="fn">employees$</span> = <span class="fn">this</span>.<span class="fn">state$</span>.<span class="fn">pipe</span>(
+    <span class="fn">map</span>((<span class="fn">s</span>) <span class="op">=></span> <span class="fn">s</span>.<span class="fn">employees</span>.<span class="fn">filter</span>(
+      (<span class="fn">e</span>) <span class="op">=></span> <span class="fn">e</span>.<span class="fn">name</span>.<span class="fn">toLowerCase</span>().<span class="fn">includes</span>(<span class="fn">s</span>.<span class="fn">filter</span>.<span class="fn">toLowerCase</span>())
+    ))
+  );
+
+  <span class="cm">// Actions</span>
+  <span class="fn">load</span>() {
+    <span class="fn">this</span>.<span class="fn">patch</span>({ <span class="fn">loading</span>: <span class="kw">true</span>, <span class="fn">error</span>: <span class="kw">null</span> });
+    <span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">get</span>&lt;<span class="cls">Employee</span>[]&gt;(<span class="str">'/api/employees'</span>).<span class="fn">subscribe</span>({
+      <span class="fn">next</span>:  (<span class="fn">employees</span>) <span class="op">=></span> <span class="fn">this</span>.<span class="fn">patch</span>({ <span class="fn">employees</span>, <span class="fn">loading</span>: <span class="kw">false</span> }),
+      <span class="fn">error</span>: (<span class="fn">err</span>)       <span class="op">=></span> <span class="fn">this</span>.<span class="fn">patch</span>({ <span class="fn">error</span>: <span class="fn">err</span>.<span class="fn">message</span>, <span class="fn">loading</span>: <span class="kw">false</span> }),
+    });
+  }
+
+  <span class="fn">setFilter</span>(<span class="fn">filter</span>: <span class="cls">string</span>) { <span class="fn">this</span>.<span class="fn">patch</span>({ <span class="fn">filter</span> }); }
+
+  <span class="kw">private</span> <span class="fn">patch</span>(<span class="fn">partial</span>: <span class="cls">Partial</span>&lt;<span class="cls">EmployeeListState</span>&gt;) {
+    <span class="fn">this</span>.<span class="fn">state$</span>.<span class="fn">next</span>({ ...<span class="fn">this</span>.<span class="fn">state$</span>.<span class="fn">value</span>, ...<span class="fn">partial</span> });
+  }
+}</pre>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════ SECTION 19 -->
+    <section id="s19">
+      <div class="section-label">Advanced</div>
+      <h2>19. scan — accumulate state over time</h2>
+      <p><code>scan</code> works like <code>Array.reduce</code> but for streams — it builds up a running value over each
+        emission.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>scan.ts</span>
+        </div>
+        <pre><span class="kw">import</span> { <span class="fn">scan</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+<span class="kw">import</span> { <span class="cls">Subject</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+
+<span class="kw">type</span> <span class="cls">Action</span> = { <span class="fn">type</span>: <span class="str">'ADD'</span> | <span class="str">'REMOVE'</span> | <span class="str">'CLEAR'</span>; <span class="fn">id</span>?: <span class="cls">number</span> };
+
+<span class="kw">const</span> <span class="fn">action$</span> = <span class="kw">new</span> <span class="cls">Subject</span>&lt;<span class="cls">Action</span>&gt;();
+
+<span class="kw">const</span> <span class="fn">selectedIds$</span> = <span class="fn">action$</span>.<span class="fn">pipe</span>(
+  <span class="fn">scan</span>((<span class="fn">ids</span>: <span class="cls">Set</span>&lt;<span class="cls">number</span>&gt;, <span class="fn">action</span>) <span class="op">=></span> {
+    <span class="kw">const</span> <span class="fn">next</span> = <span class="kw">new</span> <span class="cls">Set</span>(<span class="fn">ids</span>);
+    <span class="kw">if</span> (<span class="fn">action</span>.<span class="fn">type</span> === <span class="str">'ADD'</span>)    <span class="fn">next</span>.<span class="fn">add</span>(<span class="fn">action</span>.<span class="fn">id</span>!);
+    <span class="kw">if</span> (<span class="fn">action</span>.<span class="fn">type</span> === <span class="str">'REMOVE'</span>) <span class="fn">next</span>.<span class="fn">delete</span>(<span class="fn">action</span>.<span class="fn">id</span>!);
+    <span class="kw">if</span> (<span class="fn">action</span>.<span class="fn">type</span> === <span class="str">'CLEAR'</span>)  <span class="fn">next</span>.<span class="fn">clear</span>();
+    <span class="kw">return</span> <span class="fn">next</span>;
+  }, <span class="kw">new</span> <span class="cls">Set</span>&lt;<span class="cls">number</span>&gt;())
+);
+
+<span class="fn">action$</span>.<span class="fn">next</span>({ <span class="fn">type</span>: <span class="str">'ADD'</span>, <span class="fn">id</span>: <span class="num">1</span> });
+<span class="fn">action$</span>.<span class="fn">next</span>({ <span class="fn">type</span>: <span class="str">'ADD'</span>, <span class="fn">id</span>: <span class="num">2</span> });
+<span class="fn">action$</span>.<span class="fn">next</span>({ <span class="fn">type</span>: <span class="str">'REMOVE'</span>, <span class="fn">id</span>: <span class="num">1</span> });
+<span class="cm">// selectedIds$ emits: {1} → {1,2} → {2}</span></pre>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════ SECTION 20 -->
+    <section id="s20">
+      <div class="section-label">Advanced</div>
+      <h2>20. Memory leaks — the complete guide</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Strategy</th>
+            <th>When to use</th>
+            <th>Requires ngOnDestroy?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>async pipe</td>
+            <td>Display data in template</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td>takeUntilDestroyed()</td>
+            <td>Angular 16+, any subscription</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td>takeUntil(destroy$)</td>
+            <td>Angular 15 and below</td>
+            <td>Yes</td>
+          </tr>
+          <tr>
+            <td>take(1) / first()</td>
+            <td>One-shot streams only</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td>HttpClient (no operator)</td>
+            <td>Plain HTTP calls</td>
+            <td>No — auto-completes</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout tip">
+        <span class="callout-icon">✅</span>
+        <p><strong>Golden rule:</strong> If the Observable source never calls <code>complete()</code> (Subject,
+          interval, WebSocket, valueChanges, router events), you must use one of the above strategies. When in doubt,
+          use <code>takeUntilDestroyed()</code> — it never hurts.</p>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div><span>clean-component.ts</span>
+        </div>
+        <pre><span class="kw">@Component</span>({ ... })
+<span class="kw">export class</span> <span class="cls">CleanComponent</span> <span class="kw">implements</span> <span class="cls">OnInit</span> {
+  <span class="kw">private</span> <span class="fn">destroyRef</span> = <span class="fn">inject</span>(<span class="cls">DestroyRef</span>);
+
+  <span class="cm">// 1. async pipe — cleanest, zero boilerplate</span>
+  <span class="fn">users$</span> = <span class="fn">this</span>.<span class="fn">http</span>.<span class="fn">get</span>&lt;<span class="cls">User</span>[]&gt;(<span class="str">'/api/users'</span>);
+  <span class="cm">// template: {{ users$ | async }}</span>
+
+  <span class="fn">ngOnInit</span>() {
+    <span class="cm">// 2. takeUntilDestroyed for streams that affect non-template state</span>
+    <span class="fn">interval</span>(<span class="num">5000</span>).<span class="fn">pipe</span>(
+      <span class="fn">switchMap</span>(() <span class="op">=></span> <span class="fn">this</span>.<span class="fn">api</span>.<span class="fn">getStatus</span>()),
+      <span class="fn">takeUntilDestroyed</span>(<span class="fn">this</span>.<span class="fn">destroyRef</span>)
+    ).<span class="fn">subscribe</span>((<span class="fn">s</span>) <span class="op">=></span> <span class="fn">this</span>.<span class="fn">status</span> = <span class="fn">s</span>);
+
+    <span class="cm">// 3. take(1) for one-time initialization</span>
+    <span class="fn">this</span>.<span class="fn">configService</span>.<span class="fn">config$</span>.<span class="fn">pipe</span>(
+      <span class="fn">take</span>(<span class="num">1</span>)
+    ).<span class="fn">subscribe</span>((<span class="fn">cfg</span>) <span class="op">=></span> <span class="fn">this</span>.<span class="fn">initWith</span>(<span class="fn">cfg</span>));
+  }
+}</pre>
+      </div>
+
+      <div class="summary">
+        <h4>Quick Reference — Operator Cheat Sheet</h4>
+        <ul>
+          <li><strong>Transform values:</strong> map, pluck, mapTo</li>
+          <li><strong>Filter values:</strong> filter, distinctUntilChanged, debounceTime, throttleTime</li>
+          <li><strong>Flatten inner streams:</strong> switchMap (cancel prev), mergeMap (parallel), concatMap (queue),
+            exhaustMap (ignore while busy)</li>
+          <li><strong>Combine streams:</strong> combineLatest (on any update), forkJoin (wait all), zip (paired),
+            withLatestFrom (on one stream)</li>
+          <li><strong>Limit stream:</strong> take, first, takeUntil, takeUntilDestroyed, skip</li>
+          <li><strong>Error handling:</strong> catchError, retry, finalize</li>
+          <li><strong>Multicast &amp; cache:</strong> shareReplay, share</li>
+          <li><strong>Side effects:</strong> tap (debug, setters), finalize (cleanup)</li>
+          <li><strong>Accumulate state:</strong> scan, reduce</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</body>
+
+</html>
